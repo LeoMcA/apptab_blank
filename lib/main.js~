@@ -21,32 +21,32 @@ var widget = widgets.Widget({
 	width: 50
 });
 
-function oc(a) {
-  var o = {};
-  for(var i=0;i<a.length;i++)
-  {
-    o[a[i]]='';
-  }
-  return o;
-}
-
 function updateWidgetState(tab) {
 	let view = widget.getView(tab.window);
 	if (!view) return;
 	view.content = tabs.activeTab.isPinned == true ? "Pinned" : "Unpinned";
-	if(storage.storage.blanks in oc(tabs.activeTab.url)) {
-		view.content = "works";
-	}
+	if (tabs.activeTab.isPinned == true) {
+		storage.storage.blanks.forEach( function (element) {
+			if (element == parseUri.parseUri(tabs.activeTab.url).host) {
+				view.content = "Loaded";
+			}
+		});
+	};
 }
 
 tabs.on('ready', updateWidgetState);
 tabs.on('activate', updateWidgetState);
 
+function removeByElement(arrayName,arrayElement) {
+	for(var i=0; i<arrayName.length;i++ ) { 
+		if(arrayName[i]==arrayElement) arrayName.splice(i,1); 
+	}
+}
 
 widget.on("click", function () {
 	if (tabs.activeTab.isPinned == true) {
 		let view = widget.getView(tabs.activeTab.window);
-		view.content = toggleActivation() ? "Pinned" : "Clicked";
-		storage.storage.blanks.push(parseUri.parseUri(tabs.activeTab.url).host);
+		view.content = toggleActivation() ? "Deleted" : "Clicked";
+		toggleActivation() ? removeByElement(storage.storage.blanks, parseUri.parseUri(tabs.activeTab.url).host) : storage.storage.blanks.push(parseUri.parseUri(tabs.activeTab.url).host);
 	};
 });
