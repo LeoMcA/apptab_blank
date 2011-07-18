@@ -6,12 +6,17 @@ const pageMod = require("page-mod");
 
 exports.main = function () {
 
-	function blankLinks() {
-		pageMod.PageMod({
-		include: "*",
-		contentScriptReady: 'ready';
-		contentScript: 'for(var i = 0; i < document.getElementsByTagName("a").length; i++) document.getElementsByTagName("a")[i].setAttribute("target", "_blank");'
+	function pagemodAdd (input) {
+		var input = pageMod.PageMod({
+			include: input,
+			contentScriptReady: 'ready',
+			contentScript: 'for(var i = 0; i < document.getElementsByTagName("a").length; i++) document.getElementsByTagName("a")[i].setAttribute("target", "_blank");'
 		});
+	}
+
+	function pagemodDel (input) {
+		this[input].destroy();
+		console.log(this);
 	}
 
 	function toggleActivation() {
@@ -52,6 +57,16 @@ exports.main = function () {
 
 	tabs.on('ready', updateWidgetState);
 	tabs.on('activate', updateWidgetState);
+	
+	/* tabs.on('ready', function (tab) {
+		if (tabs.activeTab.isPinned == true) {
+			storage.storage.blanks.forEach( function (element) {
+				if (element == parseUri.parseUri(tabs.activeTab.url).host) {
+					let withWild = "*." + parseUri.parseUri(tabs.activeTab.url).host;
+					pagemodAdd(withWild);
+				}
+			});
+		}; */
 
 	widget.on("click", function () {
 		if (tabs.activeTab.isPinned == true) {
@@ -59,11 +74,13 @@ exports.main = function () {
 			if (toggleActivation() == true) {
 				view.content = "Clicked";
 				storage.storage.blanks.push(parseUri.parseUri(tabs.activeTab.url).host);
-				blankLinks();
+				let withWild = "*." + parseUri.parseUri(tabs.activeTab.url).host;
+				pagemodAdd(withWild);
 			}
 			else {
 				view.content = "Deleted";
-				removeFromStorage();
+				let withWild = "*." + parseUri.parseUri(tabs.activeTab.url).host;
+				pagemodDel(withWild);
 			}
 		};
 	});
