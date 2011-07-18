@@ -1,8 +1,9 @@
 {
-  "name": "apptab_blank",
-  "fullName": "apptab_blank",
-  "description": "a basic add-on",
-  "author": "",
-  "license": "MPL 1.1/GPL 2.0/LGPL 2.1",
-  "version": "0.1"
+    "name": "apptab_blank", 
+    "license": "MPL 1.1/GPL 2.0/LGPL 2.1", 
+    "author": "", 
+    "version": "0.1", 
+    "fullName": "apptab_blank", 
+    "id": "jid1-MY2AmIA0AoaR8g", 
+    "description": "a basic add-on"
 }
