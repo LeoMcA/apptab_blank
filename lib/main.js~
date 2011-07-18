@@ -2,8 +2,17 @@ const widgets = require("widget");
 const tabs = require("tabs");
 const storage = require("simple-storage");
 const parseUri = require("parseUri");
+const pageMod = require("page-mod");
 
 exports.main = function () {
+
+	function blankLinks() {
+		pageMod.PageMod({
+		include: "*",
+		contentScriptReady: 'ready';
+		contentScript: 'for(var i = 0; i < document.getElementsByTagName("a").length; i++) document.getElementsByTagName("a")[i].setAttribute("target", "_blank");'
+		});
+	}
 
 	function toggleActivation() {
 		blankIsOn = !blankIsOn;
@@ -17,7 +26,7 @@ exports.main = function () {
 		if (tabs.activeTab.isPinned == true) {
 			storage.storage.blanks.forEach( function (element) {
 				if (element == parseUri.parseUri(tabs.activeTab.url).host) {
-					view.content = storage.storage.blanks;
+					view.content = "Loaded";
 				}
 			});
 		};
@@ -25,7 +34,7 @@ exports.main = function () {
 
 	function removeFromStorage () {
 		var index = storage.storage.blanks.indexOf(parseUri.parseUri(tabs.activeTab.url).host);
-		if(idx!=-1) storage.storage.blanks.splice(index, 1);
+		if(index!=-1) storage.storage.blanks.splice(index, 1);
 	}
 
 	var widget = widgets.Widget({
@@ -50,13 +59,12 @@ exports.main = function () {
 			if (toggleActivation() == true) {
 				view.content = "Clicked";
 				storage.storage.blanks.push(parseUri.parseUri(tabs.activeTab.url).host);
+				blankLinks();
 			}
 			else {
 				view.content = "Deleted";
 				removeFromStorage();
 			}
-			//view.content = toggleActivation() ? "Deleted" : "Clicked";
-			//toggleActivation() ? removeFromStorage() : storage.storage.blanks.push(parseUri.parseUri(tabs.activeTab.url).host);
 		};
 	});
 }
