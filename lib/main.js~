@@ -34,11 +34,9 @@ function updateWidgetState(tab) {
 	let view = widget.getView(tab.window);
 	if (!view) return;
 	view.content = tabs.activeTab.isPinned == true ? "Pinned" : "Unpinned";
-	storage.storage.blanks.forEach( function () {
-		if (storage.storage.blanks == parseUri.parseUri(tabs.activeTab.url).host) {
-			view.content = "Works!";
-		}
-	});
+	if(storage.storage.blanks in oc(tabs.activeTab.url)) {
+		view.content = "works";
+	}
 }
 
 tabs.on('ready', updateWidgetState);
