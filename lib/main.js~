@@ -1,87 +1,19 @@
-const widgets = require("widget");
-const tabs = require("tabs");
-const storage = require("simple-storage");
-const parseUri = require("parseUri");
-const pageMod = require("page-mod");
+const w = require("widget");
+const p = require("panel");
+const t = require("tabs");
+const d = require("self").data;
 
-exports.main = function () {
-
-	function pagemodAdd (input) {
-		var input = pageMod.PageMod({
-			include: input,
-			contentScriptReady: 'ready',
-			contentScript: 'for(var i = 0; i < document.getElementsByTagName("a").length; i++) document.getElementsByTagName("a")[i].setAttribute("target", "_blank");'
-		});
-	}
-
-	function pagemodDel (input) {
-		this[input].destroy();
-		console.log(this);
-	}
-
-	function toggleActivation() {
-		blankIsOn = !blankIsOn;
-		return blankIsOn;
-	}
-
-	function updateWidgetState(tab) {
-		let view = widget.getView(tab.window);
-		if (!view) return;
-		view.content = tabs.activeTab.isPinned == true ? "Pinned" : "Unpinned";
-		if (tabs.activeTab.isPinned == true) {
-			storage.storage.blanks.forEach( function (element) {
-				if (element == parseUri.parseUri(tabs.activeTab.url).host) {
-					view.content = "Loaded";
-				}
-			});
-		};
-	}
-
-	function removeFromStorage () {
-		var index = storage.storage.blanks.indexOf(parseUri.parseUri(tabs.activeTab.url).host);
-		if(index!=-1) storage.storage.blanks.splice(index, 1);
-	}
-
-	var widget = widgets.Widget({
-		id: "apptab_blank",
-		label: "Click here to toggle apptab_blank for this tab",
-		content: " ",
-		contentScriptWhen: "ready",
-		contentScript: "self.on('click', self.port.emit('clicked'));",
-		width: 1000
-	});
-
-	var blankIsOn = false;
-
-	if (!storage.storage.blanks) storage.storage.blanks = [];
-
-	tabs.on('ready', updateWidgetState);
-	tabs.on('activate', updateWidgetState);
+exports.main = function() {
 	
-	/* tabs.on('ready', function (tab) {
-		if (tabs.activeTab.isPinned == true) {
-			storage.storage.blanks.forEach( function (element) {
-				if (element == parseUri.parseUri(tabs.activeTab.url).host) {
-					let withWild = "*." + parseUri.parseUri(tabs.activeTab.url).host;
-					pagemodAdd(withWild);
-				}
-			});
-		}; */
-
-	widget.on("click", function () {
-		if (tabs.activeTab.isPinned == true) {
-			let view = widget.getView(tabs.activeTab.window);
-			if (toggleActivation() == true) {
-				view.content = "Clicked";
-				storage.storage.blanks.push(parseUri.parseUri(tabs.activeTab.url).host);
-				let withWild = "*." + parseUri.parseUri(tabs.activeTab.url).host;
-				pagemodAdd(withWild);
-			}
-			else {
-				view.content = "Deleted";
-				let withWild = "*." + parseUri.parseUri(tabs.activeTab.url).host;
-				pagemodDel(withWild);
-			}
-		};
+	var panel = p.Panel({
+		contentURL: d.url("panel.js")
 	});
+	
+	var widget = w.Widget({
+		id: "apptab_blank",
+		title: "Click to disable for certain websites",
+		panel: panel,
+		contentURL: "http://www.mozilla.org/favicon.ico"
+	});
+
 }
