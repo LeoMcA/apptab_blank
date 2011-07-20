@@ -3,9 +3,10 @@ const p = require("panel");
 const t = require("tabs");
 const d = require("self").data;
 const pu = require("parseUri");
+const pm = require("page-mod");
 
 exports.main = function() {
-	
+
 	var panel = p.Panel({
 		contentURL: d.url("panel.html"),
 		contentScriptFile: d.url("panel.js"),
@@ -16,7 +17,6 @@ exports.main = function() {
 		label: "Click to disable for certain websites",
 		panel: panel,
 		contentURL: "http://www.mozilla.org/favicon.ico",
-		//contentScript: "self.on('click', self.port.emit('click'));"
 	});
 	
 	function countAppTabs() {
@@ -35,5 +35,21 @@ exports.main = function() {
 	}
 	
 	widget.on('click', countAppTabs);
-	//widget.on('click', panel.show);
+	
+	panel.port.on("disabled", function (disabled) {
+		console.log("panel.js msgs main.js");
+		var hosts = [];
+		disabled.forEach(function(element) {
+			hosts.push("*." + element);
+		});
+		pageMod.destroy;
+		var pageMod = pm.PageMod({
+			include: hosts,
+			contentScriptWhen: "ready",
+			contentScript: 'var links = document.getElementsByTagName("a");' +
+					'for (var i = 0; i < links.length; ++i) {' +
+						'links[i].setAttribute("target", "_blank");' +
+					'}',
+		});
+	});
 }
